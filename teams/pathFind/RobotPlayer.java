@@ -32,6 +32,7 @@ public class RobotPlayer {
 	}
 	
 	public static void runSoldier() throws GameActionException {
+		shoot();
 		if (isHQPathFound()) {
 			moveWhereHQWants();
 		} else {
@@ -55,6 +56,21 @@ public class RobotPlayer {
 		} 
 	}
 	
+	public static void shoot() throws GameActionException {
+		Robot[] enemies = rc.senseNearbyGameObjects(Robot.class, RobotType.SOLDIER.attackRadiusMaxSquared, rc.getTeam().opponent());
+		if (enemies.length > 0) {
+			if (rc.isActive()) {
+				RobotInfo robotToAttack = rc.senseRobotInfo(enemies[(int)(Math.random() * enemies.length)]);
+				if (robotToAttack.type != RobotType.HQ) {
+					MapLocation attackLocation = robotToAttack.location;
+					if (rc.canAttackSquare(attackLocation)) {
+						rc.attackSquare(attackLocation);
+					}
+				}
+			}
+		}
+	}
+
 	public static void moveRandomly() throws GameActionException {
 		Direction movingDirection = directions[(int)(Math.random() * 8)];
 		if (rc.isActive()) {
@@ -70,7 +86,7 @@ public class RobotPlayer {
 			if (rc.canMove(movingDirection)) {
 				rc.move(movingDirection);
 			} else {
-				//moveRandomly();
+				moveRandomly();
 			}
 		}
 	}
@@ -114,8 +130,8 @@ public class RobotPlayer {
 		int startX = destination.x;
 		int startY = destination.y;
 
-		int xOffsets[] = {-1, -1, -1,  0,  1, 1, 1, 0};
-		int yOffsets[] = { 1,  0, -1, -1, -1, 0, 1, 1};
+		int xOffsets[] = {0, 1,  0, -1, -1, -1,  1,  1};
+		int yOffsets[] = {1, 0, -1,  0, -1,  1, -1, -1};
 
 		boolean visited[][] = new boolean[width][height];
 		for (int x = 0; x < width; x++) {
@@ -139,6 +155,8 @@ public class RobotPlayer {
 
 			if (timeLeft == 0) {
 				for (int i = 0; i < 8; i++) {
+					spawn();
+					
 					int nextX = currentX + xOffsets[i];
 					int nextY = currentY + yOffsets[i];
 
