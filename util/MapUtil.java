@@ -48,8 +48,7 @@ public class MapUtil extends JFrame {
 
 			@Override
 			public void focusLost(FocusEvent arg0) {
-				// TODO Auto-generated method stub
-				
+
 			}
 			
 		});
