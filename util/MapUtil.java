@@ -35,7 +35,7 @@ public class MapUtil extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				int[] dimensions = map.update(textArea.getText(), jcb.getSelectedIndex());
-				map.setPreferredSize(new Dimension(dimensions[0] * 10, dimensions[1] * 22));
+				map.setPreferredSize(new Dimension(dimensions[0] * 10, dimensions[1] * 21));
 			}
 		});
 		
@@ -124,6 +124,8 @@ class Map extends JPanel {
 			}
 		}
 		
+		System.out.println(width + ", " + height);
+		
 		repaint();
 
 		return new int[]{width, height};
@@ -148,15 +150,21 @@ class Map extends JPanel {
 					}
 					g.fillRect(x * 10, y * 10, 10, 10);
 					
+					g.setColor(Color.BLACK);
+					g.drawString((width * height) + " nodes", 10, height * 10 + 15);
+					
 					if (coarsenedMap != null) {
-						if (coarsenedMap[x][y] != -1) {
-							g.setColor(colors[coarsenedMap[x][y] % 8]);
-						} else {
+						if (coarsenedMap[x][y] == -1) {
 							g.setColor(Color.BLACK);
+						} else {
+							g.setColor(colors[coarsenedMap[x][y] % 8]);
 						}
 						
-						g.fillRect(x * 10, height * 10 + 10 + y * 10, 10, 10);
-					}
+						g.fillRect(x * 10, height * 10 + 20 + y * 10, 10, 10);
+						
+						g.setColor(Color.BLACK);
+						g.drawString((coarsenedMap[width - 1][height - 1]) + " nodes", 10, height * 20 + 35);
+					}	
 				}
 			}
 			
