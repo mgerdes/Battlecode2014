@@ -26,7 +26,7 @@ public class RobotPlayer {
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
 				newMap[x][y][0] = -1;
-				newMap[x][y][1] = -1;
+				newMap[x][y][1] = -1;	
 				newMap2[x][y] = -1;
 				newMap2[x][y] = -1;
 			}
