@@ -1,6 +1,7 @@
 package coarsenMap2;
 
 import java.util.*;
+
 import battlecode.common.*;
 
 public class RobotPlayer {
@@ -17,8 +18,13 @@ public class RobotPlayer {
 	static int width;
 	static int height;
 	
+	static boolean pathFound;
+	
+	
 	public static void run (RobotController rcin) {		
 		try {	
+			pathFound = false;
+			
 			rc = rcin;
 			init();
 			while(true) {
@@ -57,7 +63,11 @@ public class RobotPlayer {
 	}
 	
 	public static void runHQ() throws GameActionException {
-		
+		if (!pathFound) {
+			bfs(rc.senseEnemyHQLocation());
+			pathFound = true;
+			printPath();
+		}
 	}
 	
 	public static void createMap() throws GameActionException {
@@ -236,7 +246,7 @@ public class RobotPlayer {
 		}
 	}
 	
-	public static void bfs(MapLocation location) {
+	public static void bfs(MapLocation location) throws GameActionException {
 		int startX = location.x;
 		int startY = location.y;
 		
@@ -261,22 +271,56 @@ public class RobotPlayer {
 			int currentX = q.dequeue();
 			int currentY = q.dequeue();
 			
+			MapLocation currentLocation = new MapLocation(currentX, currentY);
+			
 			for (int i = 0; i < 4; i++) {
 				neighbor = getNeighbor(currentX, currentY, xOffsets[i], yOffsets[i]);
-				if(neighbor[0] != -1) {
-					q.enqueue(neighbor[0]);
-					q.enqueue(neighbor[1]);
+				
+				int nextX = neighbor[0];
+				int nextY = neighbor[1];
+				
+				if(nextX != -1) {
+					if (!visited[nextX][nextY]) {
+						q.enqueue(neighbor[0]);
+						q.enqueue(neighbor[1]);
+						
+						MapLocation nextLocation = new MapLocation(nextX, nextY);
+						
+						rc.broadcast(locToInt(nextLocation), nextLocation.directionTo(currentLocation).ordinal());
+						
+						visited[neighbor[0]][neighbor[1]] = true;
+					}
 				}
 			}
+		}
+	}
+	
+	public static int locToInt(MapLocation location) throws GameActionException {
+		return location.x * 100 + location.y;
+	}
+
+	public static MapLocation intToLoc(int location) throws GameActionException {
+		return new MapLocation(location / 100, location % 100);
+	}
+	
+	public static void printPath() throws GameActionException {
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < width; y++) {
+				int xPoint = coarsenedMap[x][y][0];
+				int yPoint = coarsenedMap[x][y][0];
+				//System.out.print(rc.readBroadcast(locToInt(new MapLocation(xPoint ,yPoint))));
+				System.out.print(coarsenedMap[x][y][0] + ",");
+			}
+			System.out.println();
 		}
 	}
 	
 	public static int[] getNeighbor(int xStart, int yStart, int xDirection, int yDirection) {
 		int x = xStart, y = yStart;
 		int initialNodeColor = coarsenedMapColors[x][y];
-		while (x < width && x > -1 && y < height && y < height && map[x][y] != 2) {
+		while (x < width && x > -1 && y < height && y > -1 && map[x][y] != 2) {
 			if (coarsenedMapColors[x][y] != initialNodeColor) {
-				return new int[]{x, y};
+				return new int[]{coarsenedMap[x][y][0], coarsenedMap[x][y][1]};
 			}
 			
 			x += xDirection;
