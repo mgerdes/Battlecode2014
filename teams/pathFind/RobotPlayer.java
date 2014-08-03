@@ -20,7 +20,6 @@ public class RobotPlayer {
 		height = rc.getMapHeight();
 		
 		try {
-			printMap();
 			while (true) {	
 				if (rc.getType() == RobotType.SOLDIER) {
 					runSoldier();
@@ -47,6 +46,7 @@ public class RobotPlayer {
 
 	public static void runHQ() throws GameActionException {
 		spawn();
+		shoot();
 		
 		if (map == null) {
 			createMap();
@@ -62,10 +62,10 @@ public class RobotPlayer {
 			setHQPathFound(0);
 		}
 
-		if (!isHQPathFound(1)) {
-			findHQPathTo(new MapLocation(width / 2, height / 2), 1);
-			setHQPathFound(1);
-		}
+		//if (!isHQPathFound(1)) {
+			//findHQPathTo(new MapLocation(width / 2, height / 2), 1);
+			//setHQPathFound(1);
+		//}
 
 //		if (!isHQPathFound(2)) {
 //			findHQPathTo(optimalCowLocation(), 2);

@@ -6,6 +6,8 @@ import java.awt.*;
 import java.awt.event.*;
 
 public class MapUtil extends JFrame {
+	
+	//testing?
 
 	MapUtil() {
 		JPanel content = new JPanel();
@@ -78,7 +80,7 @@ class Map extends JPanel {
 	int coarsenedMap[][];
 	int width;
 	int height;
-	Color colors[] = {Color.RED, Color.BLUE, Color.YELLOW, Color.ORANGE, Color.CYAN, Color.GREEN, Color.MAGENTA, Color.PINK};
+	Color colors[] = {Color.RED, Color.BLUE, Color.YELLOW, Color.GREEN, Color.MAGENTA, Color.PINK};
 
 	int[] update(String s, int doWhat) {
 		if (doWhat == 0) {
@@ -156,7 +158,7 @@ class Map extends JPanel {
 						if (coarsenedMap[x][y] == -1) {
 							g.setColor(Color.BLACK);
 						} else {
-							g.setColor(colors[coarsenedMap[x][y] % 8]);
+							g.setColor(colors[coarsenedMap[x][y] % colors.length]);
 						}
 						
 						g.fillRect(x * 10, height * 10 + 20 + y * 10, 10, 10);

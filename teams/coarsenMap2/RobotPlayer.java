@@ -20,7 +20,6 @@ public class RobotPlayer {
 	
 	static boolean pathFound;
 	
-	
 	public static void run (RobotController rcin) {		
 		try {	
 			pathFound = false;
@@ -30,6 +29,8 @@ public class RobotPlayer {
 			while(true) {
 				if (rc.getType() == RobotType.HQ){
 					runHQ();
+				} else if (rc.getType() == RobotType.SOLDIER) {
+					runSoldier();
 				}
 				rc.yield();
 			}
@@ -59,14 +60,38 @@ public class RobotPlayer {
 		//printMap();
 		createCoarsenedMap();
 		coarsenMap();
-		printCoarsenedMap();
+		//printCoarsenedMap();
+	}
+	
+	public static void runSoldier() throws GameActionException {
+		if (rc.isActive()) {
+			MapLocation loc = rc.getLocation();
+			
+			int xPoint = coarsenedMap[loc.x][loc.y][0];
+			int yPoint = coarsenedMap[loc.x][loc.y][1];
+			
+			Direction movingDirection = Direction.values()[rc.readBroadcast(locToInt(new MapLocation(xPoint, yPoint)))];
+			
+			if (rc.canMove(movingDirection)) {
+				rc.move(movingDirection);
+			} else {
+				//movingDirection = Direction.values()[(int)(Math.random() * 8)];
+				//if (rc.canMove(movingDirection)) {
+				//	rc.move(movingDirection);
+				//}
+			}
+		}
 	}
 	
 	public static void runHQ() throws GameActionException {
 		if (!pathFound) {
+			printCoarsenedMap();
 			bfs(rc.senseEnemyHQLocation());
 			pathFound = true;
-			printPath();
+			//printPath();
+		}
+		if (rc.isActive() && rc.canMove(Direction.NORTH)) {
+			rc.spawn(Direction.NORTH);
 		}
 	}
 	
@@ -89,7 +114,7 @@ public class RobotPlayer {
 						inside = true;
 						goUpAndDown(x, y);
 					}
-				} else if (map[x][y] != 2) {
+				} else if (inside && map[x][y] != 2) {
 					inside = false;
 					goUpAndDown(x - 1, y);
 				}
@@ -142,77 +167,76 @@ public class RobotPlayer {
 	}
 	
 	public static void coarsenMap() {
+		Queue q = new Queue(10000);
 		int i = 0;
-		for (int x = 0; x < width; x++) {
-			for (int y = 0; y < height; y++) {
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
 				if (coarsenedMapColors[x][y] == -1) {
-					fillCoarsenedMap(x, y, i);
+					fillCoarsenedMap(x, y, i, q);
 					i++;
 				}
 			}
 		}
 	}
 	
-	public static void fillCoarsenedMap(int xStart, int yStart, int i) {
+	public static void fillCoarsenedMap(int xStart, int yStart, int i, Queue q) {
 		int x, y;
 		
+		int xTotal = 0, yTotal = 0, number = 0;
+				
 		for (x = xStart; x < width; x++) {
-			
-			/*
-			if (coarsenedMapUpDown[x][yStart] == 1 || map[x][yStart] == 2) {
+			if (map[x][yStart] == 2) {
 				break;
 			}
-			*/
-			
 			for (y = yStart; y < height; y++) {
-				
-				/*
-				if (coarsenedMapLeftRight[xStart][y] == 1 || map[xStart][y] == 2) {
+				if (map[xStart][y] == 2) {
 					break;
 				}
-				*/
-				
-				coarsenedMapColors[x][y] = i;
-				coarsenedMap[x][y][0] = xStart;
-				coarsenedMap[x][y][1] = yStart;
-				
-				if (coarsenedMapLeftRight[xStart][y] == 1 || map[xStart][y] == 2) {
+						
+				if (map[x][y] == 2) {
+					coarsenedMap[x][y][0] = -1;
+					coarsenedMap[x][y][1] = -1;
+					coarsenedMapColors[x][y] = -1;
+				} else {
+					q.enqueue(x);
+					q.enqueue(y);
+					
+					number++;
+					xTotal += x;
+					yTotal += y;
+					
+					coarsenedMapColors[x][y] = i;
+				}
+				if (coarsenedMapLeftRight[xStart][y] == 1) {
 					break;
 				}
-				
+				if ((y + 1 < height) && (coarsenedMapLeftRight[xStart][y + 1] == 1)) {
+					break;
+				}
 			}
-			
-			if (coarsenedMapUpDown[x][yStart] == 1 || map[x][yStart] == 2) {
+			if (coarsenedMapUpDown[x][yStart] == 1) {
 				break;
 			}
+			if ((x + 1 < width) && (coarsenedMapUpDown[x + 1][yStart] == 1)) {
+				break;
+			}
+		}
+		
+		if (number != 0) {	
+			int xAverage = xTotal / number;
+			int yAverage = yTotal / number;
 			
+			while (!q.isEmpty()) {
+				int newX = q.dequeue();
+				int newY = q.dequeue();
+				
+				coarsenedMap[newX][newY][0] = xAverage;
+				coarsenedMap[newX][newY][1] = yAverage;
+			}
 		}
 	}
 
-	public static void printCoarsenedMap() {
-		/*
-		for (int y = 0; y < height; y++) {
-			for (int x = 0; x < width; x++) {
-				if (coarsenedMapUpDown[x][y] == 1) System.out.print('|');
-				else if (map[x][y] == 2) System.out.print(1);
-				else System.out.print(0);
-			}
-			System.out.println();
-		}
-		
-		System.out.println();
-		
-		for (int y = 0; y < height; y++) {
-			for (int x = 0; x < width; x++) {
-				if (coarsenedMapLeftRight[x][y] == 1) System.out.print('-');
-				else if (map[x][y] == 2) System.out.print(1);
-				else System.out.print(0);
-			}
-			System.out.println();
-		}
-		*/
-		
-		
+	public static void printCoarsenedMap() {		
 		System.out.println();
 		
 		for (int y = 0; y < height; y++) {
@@ -230,6 +254,38 @@ public class RobotPlayer {
 			System.out.print("!");
 			System.out.println();
 		}
+		/*
+		
+		System.out.println();
+		
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				if (map[x][y] == 2) {
+					System.out.print('#');
+				} else if (coarsenedMapLeftRight[x][y] == 1) {
+					System.out.print('#');
+				} else {
+					System.out.print('0');
+				}
+			}
+			System.out.println();
+		}
+		
+		System.out.println();
+		
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				if (map[x][y] == 2) {
+					System.out.print('#');
+				} else if (coarsenedMapUpDown[x][y] == 1) {
+					System.out.print('#');
+				} else {
+					System.out.print('0');
+				}
+			}
+			System.out.println();
+		}
+		*/
 	}
 	
 	public static void printMap() throws GameActionException {
@@ -308,8 +364,8 @@ public class RobotPlayer {
 			for (int y = 0; y < width; y++) {
 				int xPoint = coarsenedMap[x][y][0];
 				int yPoint = coarsenedMap[x][y][0];
-				//System.out.print(rc.readBroadcast(locToInt(new MapLocation(xPoint ,yPoint))));
-				System.out.print(coarsenedMap[x][y][0] + ",");
+				System.out.print(rc.readBroadcast(locToInt(new MapLocation(xPoint ,yPoint))));
+				//System.out.print("[" + coarsenedMap[x][y][0] + "," + coarsenedMap[x][y][1] + "], ");
 			}
 			System.out.println();
 		}
@@ -367,6 +423,10 @@ class Queue {
 			head = head + 1;
 		}
 		return x;
+	}
+	
+	void clear() {
+		head = tail = 0;
 	}
 	
 	boolean isEmpty() {
