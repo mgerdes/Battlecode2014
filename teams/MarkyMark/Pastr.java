@@ -54,6 +54,21 @@ public class Pastr {
 				}
 			}
 		}
+		
+		int optiX = optimalCowLocation.x + 2;
+		int optiY = optimalCowLocation.y + 2;
+		
+		int offsets[] = {0, -1, 1, -2, 2};
+		
+		for (int i = 0; i < 5; i++) {
+			for (int j = 0; j < 5; j++) {
+				int xAdd = offsets[i];
+				int yAdd = offsets[j];
+				if (Movement.map[optiX + xAdd][optiY + yAdd] != 2 && cowLocations[optiX + xAdd][optiY + yAdd] > 0) {
+					return new MapLocation(optiX + xAdd, optiY + yAdd);
+				}
+			}
+		}
 				
 		return optimalCowLocation.add(2, 2);
 	}

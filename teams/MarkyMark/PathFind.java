@@ -15,14 +15,22 @@ public class PathFind {
 	public static final int ENEMY_PASTR_PATH_NUM = 1;
 	public static final int ENEMY_PASTR_ID_CHANNEL = 60008;
 	
+	public static final MapLocation ENEMY_HQ_LOCATION = rc.senseEnemyHQLocation();
+	public static final MapLocation FRIENDLY_HQ_LOCATION = rc.senseHQLocation();
+	
+	public static int ENEMY_HQ_LOCATION_X = ENEMY_HQ_LOCATION.x;
+	public static int ENEMY_HQ_LOCATION_Y = ENEMY_HQ_LOCATION.y;
+	public static int FRIENDLY_HQ_LOCATION_X = FRIENDLY_HQ_LOCATION.x;
+	public static int FRIENDLY_HQ_LOCATION_Y = FRIENDLY_HQ_LOCATION.y;
+	
 	public static void findHQLocationTo(MapLocation location, int pathNum) throws GameActionException {
 		rc.broadcast(HQ_PATH_LOCATION_CHANNEL[pathNum], Movement.locToInt(location));
 		
 		int startX = location.x;
 		int startY = location.y;
 
-		int xOffsets[] = {0, 1,  0, -1, -1, -1,  1,  1};
-		int yOffsets[] = {1, 0, -1,  0, -1,  1, -1, -1};
+		int xOffsets[] = {0, 1,  0, -1, -1, -1,  1, 1};
+		int yOffsets[] = {1, 0, -1,  0, -1,  1, -1, 1};
 
 		boolean visited[][] = new boolean[Movement.width][Movement.height];
 		for (int x = 0; x < Movement.width; x++) {
@@ -58,11 +66,10 @@ public class PathFind {
 							q.enqueue(nextX);
 							q.enqueue(nextY);
 							q.enqueue((Movement.map[nextX][nextY] + 1) % 2);
-							
+								
 							visited[nextX][nextY] = true;
 							
 							MapLocation nextLocation = new MapLocation(nextX, nextY);
-							
 							rc.broadcast(getBroadcastChannelNum(nextLocation, pathNum), nextLocation.directionTo(currentLocation).ordinal() + 1);
 						}
 					}

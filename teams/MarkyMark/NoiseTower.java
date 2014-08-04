@@ -10,31 +10,55 @@ public class NoiseTower {
 	static RobotController rc = RobotPlayer.rc;
 	
 	static int time = 5;
-	static MapLocation attackLoc;
-	static MapLocation nextAttackLoc;
+	
+	static int directionIndex = 0;
+	static int distance = 20;
+	
+	static int xOffset[] = {-1, -1, -1,  0,  1, 1, 1, 0};
+	static int yOffset[] = { 1,  0, -1, -1, -1, 0, 1, 1};
+	
+	static MapLocation location = rc.getLocation();
+	static int x = location.x;
+	static int y = location.y;
+	
+	static int currentRoundNum = Clock.getRoundNum();
+		
+	static double cowLocations[][] = rc.senseCowGrowth();
 	
 	public static void run() throws GameActionException {
 		if (rc.isActive()) {		
-			
+		
 			if (rc.getHealth() < 50) {
 				NoiseTower.towerCountSubtract();
 			}
 			
-			if (attackLoc == null) {
-				attackLoc = optimalCowAttackLocation();
-				//attackLoc = new MapLocation(25, 18);
+			if ((Clock.getRoundNum() - 1) > currentRoundNum) {
+				distance -= 2;
+				
+				if (distance < 3) {					
+					directionIndex++;
+					if (directionIndex == 8) {
+						directionIndex = 0;
+					}
+					
+					distance = 18;
+				}
+				
+				currentRoundNum = Clock.getRoundNum();				
 			}
-			if (time == 2) {
-				nextAttackLoc = optimalCowAttackLocation();
-			}
-			if (time == 0) {
-				attackLoc = nextAttackLoc;
-				time = 5;
-			}
-			time--;
-			attack(attackLoc);
-			rc.setIndicatorString(0, attackLoc.x + ", " + attackLoc.y);
+			
+			attack(new MapLocation(x + (distance * xOffset[directionIndex]), y + (distance * yOffset[directionIndex])));
 		}
+	}
+	
+	public static int startingDistance(int directionIndex) {
+		int startingDistance = 0;
+		while (startingDistance < 20 
+				&& startingDistance * xOffset[directionIndex] < Movement.width 
+				&& startingDistance * yOffset[directionIndex] < Movement.height) {
+			startingDistance += 2;
+		}
+		return startingDistance;
 	}
 	
 	public static void buildTower() throws GameActionException {
@@ -49,41 +73,7 @@ public class NoiseTower {
 			rc.attackSquare(location);
 		}
 	}
-	
-	public static MapLocation optimalCowAttackLocation() throws GameActionException {
-		MapLocation startLoc = rc.getLocation();
-		int startX = startLoc.x;
-		int startY = startLoc.y;
 		
-		MapLocation maxCowLocation = new MapLocation(0, 0);
-		int maxCowCount = 0;
-				
-		int dist = 10;
-		
-		for (int x = startX - dist; x < startX + dist; x++) {
-			for (int y = startY - dist; y < startY + dist; y++) {
-				
-				MapLocation curLoc = new MapLocation(x,y);
-				
-				if (rc.canSenseSquare(curLoc)) {
-					int numOfCowsAtCurLoc = (int)rc.senseCowsAtLocation(curLoc);
-					if (numOfCowsAtCurLoc > maxCowCount) {
-						if (Math.abs(x - startX) > 2 && Math.abs(y - startY) > 2) {
-							maxCowCount = numOfCowsAtCurLoc;
-							maxCowLocation = curLoc;
-						}
-						if (attackLoc != null) {
-							attack(attackLoc);
-						}
-					}
-				}
-				
-			}
-		}
-		
-		return maxCowLocation.add(1, 1);
-	}
-	
 	public static int towerCount() throws GameActionException {
 		return rc.readBroadcast(61005);
 	}
