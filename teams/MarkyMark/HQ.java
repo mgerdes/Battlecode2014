@@ -55,13 +55,17 @@ public class HQ {
 	}
 	
 	public static void shoot() throws GameActionException {
-		Robot[] enemies = rc.senseNearbyGameObjects(Robot.class, RobotType.HQ.attackRadiusMaxSquared, rc.getTeam().opponent());		
+		Robot[] enemies = rc.senseNearbyGameObjects(Robot.class, RobotType.SOLDIER.attackRadiusMaxSquared, rc.getTeam().opponent());
 		if (enemies.length > 0) {
-			RobotInfo robotToAttack = rc.senseRobotInfo(enemies[(int)(Math.random() * enemies.length)]);
-			MapLocation attackLocation = robotToAttack.location;
-			if (rc.isActive() && rc.canAttackSquare(attackLocation)) {
-				rc.attackSquare(attackLocation);
-			} 
+			if (rc.isActive()) {
+				RobotInfo robotToAttack = rc.senseRobotInfo(enemies[(int)(Math.random() * enemies.length)]);
+				if (robotToAttack.type != RobotType.HQ) {
+					MapLocation attackLocation = robotToAttack.location;
+					if (rc.canAttackSquare(attackLocation)) {
+						rc.attackSquare(attackLocation);
+					} 
+				}
+			}
 		}
 	}
 	
