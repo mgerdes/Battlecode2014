@@ -1,4 +1,4 @@
-FILES=~/Battlecode2014/maps/*
+FILES=./maps/*
 
 aWins=0
 bWins=0
@@ -35,6 +35,7 @@ do
 		((bWins++))
 	fi
 
+	rm './matches/'"$teamA"'-vs-'"$teamB"'/'"$mapName"*'
 	mv './matches/'"$teamA"'-vs-'"$teamB"'/match.rms' './matches/'"$teamA"'-vs-'"$teamB"'/'"$mapName"'-W-'"$winner"'-L-'"$loser"'.rms' 
 
 	echo "--------------------------------------------------"

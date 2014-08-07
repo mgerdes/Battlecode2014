@@ -25,13 +25,10 @@ public class NoiseTower {
 		
 	static double cowLocations[][] = rc.senseCowGrowth();
 	
+	static final int IS_TOWER_BUILT_CHANNEL = 61001;
+	
 	public static void run() throws GameActionException {
-		if (rc.isActive()) {		
-		
-			if (rc.getHealth() < 50) {
-				NoiseTower.towerCountSubtract();
-			}
-			
+		if (rc.isActive()) {
 			if ((Clock.getRoundNum() - 1) > currentRoundNum) {
 				distance -= 2;
 				
@@ -64,7 +61,7 @@ public class NoiseTower {
 	public static void buildTower() throws GameActionException {
 		if (rc.isActive()) {
 			rc.construct(RobotType.NOISETOWER);
-			towerCountAdd();
+			setTowerBuilt();
 		}
 	}
 	
@@ -73,16 +70,42 @@ public class NoiseTower {
 			rc.attackSquare(location);
 		}
 	}
+	
+	public static boolean isConstructing() throws GameActionException {
+		Robot robots[] = rc.senseNearbyGameObjects(Robot.class, 10000, rc.getTeam());
 		
-	public static int towerCount() throws GameActionException {
-		return rc.readBroadcast(61005);
+		for (Robot robot : robots) {
+			if (rc.canSenseObject(robot)) {
+				RobotInfo robotInfo = rc.senseRobotInfo(robot);
+				if(robotInfo.isConstructing && robotInfo.constructingType == RobotType.NOISETOWER) return true;
+			}
+		}
+		
+		return false;
 	}
 	
-	public static void towerCountAdd() throws GameActionException {
-		rc.broadcast(61005, towerCount() + 1);
+	public static void setTowerBuilt() throws GameActionException {
+		rc.broadcast(IS_TOWER_BUILT_CHANNEL, 1);;
 	}
 	
-	public static void towerCountSubtract() throws GameActionException {
-		rc.broadcast(61005, towerCount() - 1);
+	public static boolean isTowerBuiltFull() throws GameActionException {
+		if (isConstructing()) return true;
+		
+		Robot robots[] = rc.senseNearbyGameObjects(Robot.class, 10000, rc.getTeam());
+		int count = 0;
+		
+		for (Robot robot : robots) {
+			if (rc.canSenseObject(robot)) {
+				if (rc.senseRobotInfo(robot).type == RobotType.NOISETOWER){
+					count++;
+				}
+			}
+		}
+		
+		return count > 0;
+	}
+	
+	public static boolean isTowerBuilt() throws GameActionException {
+		return rc.readBroadcast(IS_TOWER_BUILT_CHANNEL) == 1;
 	}
 }

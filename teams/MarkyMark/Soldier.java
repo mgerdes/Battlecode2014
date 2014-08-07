@@ -19,6 +19,13 @@ public class Soldier {
 	
 	public static void run() throws GameActionException {
 		doYourThing();
+		
+		int startingByteCodes = Clock.getBytecodeNum();
+		
+		Pastr.isPastrBuilt();
+		NoiseTower.isTowerBuilt();
+		
+		rc.setIndicatorString(0, "" + (Clock.getBytecodeNum() - startingByteCodes));
 						
 		if (Pastr.enemyPastrCount() > 0) {
 			Movement.moveToEnemyPastrLocation(Movement.RUN);
@@ -27,10 +34,9 @@ public class Soldier {
 				Movement.moveToFriendlyPastrLocation(Movement.RUN);
 				// destroy and build own pastr if enemy builds one.
 			} else {			
-				rc.setIndicatorString(0, PathFind.distanceSquaredToPathLocation(PathFind.FRIENDLY_PASTR_PATH_NUM) + "");
-				if (Pastr.pastrCount() < 1 && PathFind.distanceSquaredToPathLocation(PathFind.FRIENDLY_PASTR_PATH_NUM) < 2) {
+				if (!Pastr.isPastrBuilt() && PathFind.distanceSquaredToPathLocation(PathFind.FRIENDLY_PASTR_PATH_NUM) < 2 && inGoodSituation()) {
 					Pastr.buildPastr();
-				} else if (NoiseTower.towerCount() < 1 && PathFind.distanceSquaredToPathLocation(PathFind.FRIENDLY_PASTR_PATH_NUM) < 2) {
+				} else if (!NoiseTower.isTowerBuilt() && PathFind.distanceSquaredToPathLocation(PathFind.FRIENDLY_PASTR_PATH_NUM) < 2 && inGoodSituation()) {
 					NoiseTower.buildTower();
 				} else {
 					Movement.moveToFriendlyPastrLocation(Movement.SNEAK);
@@ -41,6 +47,23 @@ public class Soldier {
 	
 	public static void doYourThing() throws GameActionException {
 		shoot();
+	}
+	
+	public static boolean inGoodSituation() throws GameActionException {
+		Robot robots[] = rc.senseNearbyGameObjects(Robot.class, 50, rc.getTeam());
+		int friendlyCount = 0;
+		
+		for (Robot robot : robots) {
+			if (rc.senseRobotInfo(robot).type == RobotType.SOLDIER) {
+				friendlyCount++;
+			}
+		}
+		
+		if (friendlyCount < 5) {
+			return false;
+		}
+		
+		return true;
 	}
 	
 	public static void shoot() throws GameActionException {

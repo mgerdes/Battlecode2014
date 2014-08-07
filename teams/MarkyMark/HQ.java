@@ -8,6 +8,7 @@ import MarkyMark.*;
 public class HQ {
 	
 	static RobotController rc = RobotPlayer.rc;
+	static int lastRoundCalculatedCount = -1;
 	
 	public static void run() throws GameActionException {
 		doYourThing();
@@ -30,8 +31,18 @@ public class HQ {
 	public static void doYourThing() throws GameActionException {
 		spawn();
 		shoot();
+		
+		int currentRoundNum = Clock.getRoundNum();
+		
+		if (currentRoundNum > lastRoundCalculatedCount + 50) {
+			
+			rc.broadcast(NoiseTower.IS_TOWER_BUILT_CHANNEL, NoiseTower.isTowerBuiltFull() ? 1 : 0);
+			rc.broadcast(Pastr.IS_PASTR_BUILT_CHANNEL, Pastr.isPastrBuiltFull() ? 1 : 0);
+			
+			lastRoundCalculatedCount = currentRoundNum;
+		}
 	}
-	
+		
 	public static void spawn() throws GameActionException {
 		if (rc.isActive() && rc.senseRobotCount() < GameConstants.MAX_ROBOTS) {
 			if (rc.canMove(Direction.NORTH)) {

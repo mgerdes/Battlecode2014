@@ -10,18 +10,16 @@ public class Pastr {
 	static int COW_BOX_WIDTH = 5;
 	static double cowLocations[][] = rc.senseCowGrowth();
 	
+	static final int IS_PASTR_BUILT_CHANNEL = 61000;
+	
 	public static void run() throws GameActionException {
-		if (rc.isActive()) {
-			if (rc.getHealth() < 50) {
-				pastrCountSubtract();
-			}
-		}
+
 	}
 	
 	public static void buildPastr() throws GameActionException {
 		if (rc.isActive()) {
 			rc.construct(RobotType.PASTR);
-			pastrCountAdd();
+			setPastrBuilt();
 		}
 	}
 	
@@ -73,22 +71,34 @@ public class Pastr {
 		return optimalCowLocation.add(2, 2);
 	}
 	
-	public static int pastrCount() throws GameActionException {
-		return rc.readBroadcast(61004);
+	
+	public static boolean isConstructing() throws GameActionException {
+		Robot robots[] = rc.senseNearbyGameObjects(Robot.class, 10000, rc.getTeam());
+		
+		for (Robot robot : robots) {
+			if (rc.canSenseObject(robot)) {
+				RobotInfo robotInfo = rc.senseRobotInfo(robot);
+				if(robotInfo.isConstructing && robotInfo.constructingType == RobotType.PASTR) return true;
+			}
+		}
+		
+		return false;
 	}
 	
-	public static void pastrCountAdd() throws GameActionException {
-		rc.broadcast(61004, pastrCount() + 1);
+	public static void setPastrBuilt() throws GameActionException {
+		rc.broadcast(IS_PASTR_BUILT_CHANNEL, 1);
 	}
 	
-	public static void pastrCountSubtract() throws GameActionException {
-		rc.broadcast(61004, pastrCount() - 1);
+	public static boolean isPastrBuiltFull() throws GameActionException {
+		if (isConstructing()) return true;
+		
+		MapLocation[] pastrs = rc.sensePastrLocations(rc.getTeam());
+		return pastrs.length > 0;
 	}
 	
-	public static int friendlyPastrCount2() throws GameActionException {	
-		MapLocation pastrLocations[] = rc.sensePastrLocations(rc.getTeam());
-		return pastrLocations.length;
-	}	
+	public static boolean isPastrBuilt() throws GameActionException {
+		return rc.readBroadcast(IS_PASTR_BUILT_CHANNEL) == 1;
+	}
 	
 	public static int enemyPastrCount() throws GameActionException {
 		MapLocation pastrLocations[] = rc.sensePastrLocations(rc.getTeam().opponent());

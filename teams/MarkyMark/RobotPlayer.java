@@ -13,13 +13,14 @@ public class RobotPlayer {
 		try {
 			init();
 			while (true) {
-				if (rc.getType() == RobotType.SOLDIER){
+				RobotType type = rc.getType();
+				if (type == RobotType.SOLDIER){
 					Soldier.run();
-				} else if (rc.getType() == RobotType.HQ){
+				} else if (type == RobotType.HQ){
 					HQ.run();
-				} else if (rc.getType() == RobotType.NOISETOWER) {
+				} else if (type == RobotType.NOISETOWER) {
 					NoiseTower.run();
-				} else if (rc.getType() == RobotType.PASTR){
+				} else if (type == RobotType.PASTR){
 					Pastr.run();
 				}
 				rc.yield();
