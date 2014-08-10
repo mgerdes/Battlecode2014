@@ -8,8 +8,9 @@ public class PathFind {
 	static RobotController rc = RobotPlayer.rc;	
 	public static final int FRIENDLY_PASTR_PATH_NUM_1 = 0;
 	public static final int FRIENDLY_PASTR_PATH_NUM_2 = 1;
-	public static final int ENEMY_PASTR_PATH_NUM = 2;
-	public static final int RALLY_PATH_NUM = 3;
+	public static final int ENEMY_PASTR_PATH_NUM_1 = 2;
+	public static final int ENEMY_PASTR_PATH_NUM_2 = 3;
+	//public static final int RALLY_PATH_NUM = 3;
 	
 	public static final MapLocation ENEMY_HQ_LOCATION = rc.senseEnemyHQLocation();
 	public static final MapLocation FRIENDLY_HQ_LOCATION = rc.senseHQLocation();
@@ -57,7 +58,7 @@ public class PathFind {
 					if (i == 0 || i == 4) {
 						if (rc.getType() == RobotType.HQ && rc.isActive()) {
 							HQ.doYourThing();
-							if (pathNum == ENEMY_PASTR_PATH_NUM) {
+							if (pathNum == ENEMY_PASTR_PATH_NUM_1 || pathNum == ENEMY_PASTR_PATH_NUM_2) {
 								// check if path is still relevant. I.e. if the enemy pastr is still there.
 								if(!isPathRelevant(destinationInt)) {
 									return;

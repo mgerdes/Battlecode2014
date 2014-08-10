@@ -18,5 +18,7 @@ public class Channels {
 	static final int IS_TOWER_BUILT_CHANNEL = 61001;
 	
 	static final int ENEMY_PASTR_COUNT = 61002;
+	
+	static final int ENEMY_TO_ATTACK_LOCATION_CHANNEL = 62000;
 
 }

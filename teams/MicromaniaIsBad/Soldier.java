@@ -18,21 +18,17 @@ public class Soldier {
 	public static void run() throws GameActionException {
 		doYourThing();
 		
-		rc.setIndicatorString(0, "" + rc.getLocation().distanceSquaredTo(rc.senseEnemyHQLocation()));
+		MapLocation enemyHQLocation = rc.senseEnemyHQLocation();
+		MapLocation myLocation = rc.getLocation();
 		
-		if (rc.getLocation().distanceSquaredTo(rc.senseEnemyHQLocation()) < RobotType.HQ.attackRadiusMaxSquared) {
-			rc.setIndicatorString(1, "WE ARE IN THE SHIT");
-			Movement.move(rc.getLocation().directionTo(rc.senseEnemyHQLocation()).opposite(), Movement.RUN);
+		// Avoid the enemy pastr.
+		if (myLocation.distanceSquaredTo(enemyHQLocation) < RobotType.HQ.attackRadiusMaxSquared) {
+			Movement.move(myLocation.directionTo(enemyHQLocation).opposite(), Movement.RUN);
 		}
 		
+		// if the enemy has built a pastr than go to it, otherwise go to the friendly pastr location.
 		if (Pastr.enemyPastrCount() > 0) {
-			if (PathFind.distanceSquaredToPathLocation(PathFind.ENEMY_PASTR_PATH_NUM) < 100) {
-				if (inGoodSituation()) {
-					Movement.moveOnPath(PathFind.ENEMY_PASTR_PATH_NUM, Movement.RUN);
-				}
-			} else {
-				Movement.moveOnPath(PathFind.ENEMY_PASTR_PATH_NUM, Movement.RUN);
-			}
+			Movement.moveOnPath(PathFind.ENEMY_PASTR_PATH_NUM_1, Movement.RUN);
 		} else {
 			Movement.moveOnPath(PathFind.FRIENDLY_PASTR_PATH_NUM_1, Movement.RUN);
 		}
@@ -42,33 +38,21 @@ public class Soldier {
 		shoot();
 	}
 	
-	// Checks to see if a robot is in a good situation.
-	// Is true if the amount of allies is greater than the amount of foes.
-	public static boolean inGoodSituation() throws GameActionException {
-		Robot robots[] = rc.senseNearbyGameObjects(Robot.class, 50, rc.getTeam());
-		int friendlyCount = 0;
-		
-		for (Robot robot : robots) {
-			if (rc.senseRobotInfo(robot).type == RobotType.SOLDIER) {
-				friendlyCount++;
-			}
-		}
-		
-		if (friendlyCount < 5) {
-			return false;
-		}
-		
-		return true;
-	}
-	
 	public static void shoot() throws GameActionException {
-		Robot[] enemies = rc.senseNearbyGameObjects(Robot.class, RobotType.HQ.attackRadiusMaxSquared, rc.getTeam().opponent());		
+		Robot[] enemies = rc.senseNearbyGameObjects(Robot.class, RobotType.SOLDIER.attackRadiusMaxSquared, rc.getTeam().opponent());		
 		if (enemies.length > 0) {
-			RobotInfo robotToAttack = rc.senseRobotInfo(enemies[(int)(Math.random() * enemies.length)]);
-			MapLocation attackLocation = robotToAttack.location;
-			if (rc.isActive() && robotToAttack.type != RobotType.HQ && rc.canAttackSquare(attackLocation)) {
-				rc.attackSquare(attackLocation);
-			} 
+			RobotInfo robotToAttack = rc.senseRobotInfo(enemies[0]);
+			
+			if (robotToAttack.type != RobotType.HQ) {
+			
+				MapLocation attackLocation = robotToAttack.location;
+				
+				if (rc.isActive() && rc.canAttackSquare(attackLocation)) {
+					rc.attackSquare(attackLocation);
+				} 
+				
+			}
+			
 		}
 	}
 

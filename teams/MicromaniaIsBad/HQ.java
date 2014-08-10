@@ -22,10 +22,10 @@ public class HQ {
 		if (Pastr.enemyPastrCount() > 0) {
 			MapLocation enemyPastrLocation = Pastr.enemyPastrLocation();
 			// checks to see if a path already goes to this pastr. If there is do nothing, if the path goes to an already destroyed pastr then make a new path.
-			if (MapData.locToInt(enemyPastrLocation) != rc.readBroadcast(Channels.PATH_LOCATION_CHANNEL[PathFind.ENEMY_PASTR_PATH_NUM])) {
+			if (MapData.locToInt(enemyPastrLocation) != rc.readBroadcast(Channels.PATH_LOCATION_CHANNEL[PathFind.ENEMY_PASTR_PATH_NUM_1])) {
 				// Make a new path because current path goes to an already destroyed pastr.
 				rc.setIndicatorString(0, "Changed path to " + MapData.locToInt(enemyPastrLocation));
-				PathFind.createPathTo(enemyPastrLocation, PathFind.ENEMY_PASTR_PATH_NUM);
+				PathFind.createPathTo(enemyPastrLocation, PathFind.ENEMY_PASTR_PATH_NUM_1);
 			}
 		}
 		
