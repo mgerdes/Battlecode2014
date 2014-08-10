@@ -8,7 +8,6 @@
 package MicromaniaIsBad;
 
 import java.util.*;
-
 import battlecode.common.*;
 
 public class Soldier {
