@@ -5,7 +5,12 @@ public class Channels {
 	// 0 - 10000 is reserved for path to friendly pastr.
 	// 10000 - 20000 is reserved for path 2 to friendly pastr.
 	// 20000 - 30000 is reserved for path to enemy pastr.
-	// 30000 - 40000 is reserved for enemy soldier information.
+	
+	// 30000 - 40000 is reserved for nothing.
+	// 40000 - 50000 is reserved for nothing.
+	
+	// 50000 - 50100 is reserved for enemy soldier infos.
+	public static final int ENEMY_LOCATION_CHANNEL = 50000;
 	
 	// these channels store whether path 1,2,3,4 have been found.
 	public static final int PATH_FOUND_CHANNEL[] = {60000, 60001, 60002, 60003};

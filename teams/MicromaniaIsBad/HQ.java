@@ -1,6 +1,7 @@
 package MicromaniaIsBad;
 
 import java.util.*;
+import MicromaniaIsBad.PathFind;
 import battlecode.common.*;
 
 public class HQ {
@@ -10,7 +11,7 @@ public class HQ {
 	
 	public static void run() throws GameActionException {
 		doYourThing();
-	
+		
 		// find a path to the optimal cow location.
 		if (!PathFind.isPathFound(PathFind.FRIENDLY_PASTR_PATH_NUM_1)) {
 			PathFind.createPathTo(Pastr.optimalCowLocation(), PathFind.FRIENDLY_PASTR_PATH_NUM_1);
@@ -20,20 +21,22 @@ public class HQ {
 		// finds the path to an enemy pastr if there is one.
 		if (Pastr.enemyPastrCount() > 0) {
 			MapLocation enemyPastrLocation = Pastr.enemyPastrLocation();
-			// checks to see if a path already goes to this pastr. If there is do nothing, if the path goes to an already destroyed pastr then make a new path.
+			// checks to see if a path already goes to this pastr. 
+			// If there is do nothing, if the path goes to an already destroyed pastr then make a new path.
+
 			if (MapData.locToInt(enemyPastrLocation) != rc.readBroadcast(Channels.PATH_LOCATION_CHANNEL[PathFind.ENEMY_PASTR_PATH_NUM_1])) {
 				// Make a new path because current path goes to an already destroyed pastr.
-				rc.setIndicatorString(0, "Changed path to " + MapData.locToInt(enemyPastrLocation));
+				//rc.setIndicatorString(0, "Changed path to " + MapData.locToInt(enemyPastrLocation));
 				PathFind.createPathTo(enemyPastrLocation, PathFind.ENEMY_PASTR_PATH_NUM_1);
-			}
+			}		
 		}
 		
 	}
-	
+		
 	public static void doYourThing() throws GameActionException {
 		spawn();
 		shoot();
-		
+
 		// execute stuff every 20 rounds.
 		int currentRoundNum = Clock.getRoundNum();
 		if (currentRoundNum > everySoOftenLastHappened + 20) {

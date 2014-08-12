@@ -33,9 +33,10 @@ public class RobotPlayer {
 	public static void init() throws GameActionException {
 		MapData.createMap();
 		if (rc.getType() == RobotType.HQ) {
-			PathFind.setPathNotFound(0);
-			PathFind.setPathNotFound(1);
-			PathFind.setPathNotFound(2);
+			PathFind.initPathFindData();
+		}
+		if (rc.getType() == RobotType.SOLDIER) {
+			Soldier.init();
 		}
 	}
 

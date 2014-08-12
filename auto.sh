@@ -7,8 +7,8 @@ mapnum=1;
 aWins=0
 bWins=0
 
-teamA=bot
-teamB=examplefuncsplayer
+teamA=Microscopia
+teamB=MicromaniaIsBad
 
 teamAC='\e[1;31m' # Team A's color
 teamBC='\e[1;34m' # Team B's color
@@ -59,7 +59,5 @@ do
 done
 
 zdump EST >> './matches/'"$teamA"'-vs-'"$teamB"'/results.txt'
-
 echo $teamA " won " $aWins " times. " $(($((100 * $aWins))/$(($aWins+$bWins)))) "%." >> './matches/'"$teamA"'-vs-'"$teamB"'/results.txt'
-
 echo $teamB " won " $bWins " times. " $(($((100 * $bWins))/$(($aWins+$bWins)))) "%." >> './matches/'"$teamA"'-vs-'"$teamB"'/results.txt'

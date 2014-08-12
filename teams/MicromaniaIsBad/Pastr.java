@@ -11,7 +11,6 @@ public class Pastr {
 		
 	public static void run() throws GameActionException {
 		if (rc.isActive()) {
-
 		}
 	}
 	

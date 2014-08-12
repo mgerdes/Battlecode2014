@@ -1,6 +1,7 @@
 package MicromaniaIsBad;
 
 import java.util.*;
+
 import battlecode.common.*;
 
 public class PathFind {
@@ -14,8 +15,7 @@ public class PathFind {
 	
 	public static final MapLocation ENEMY_HQ_LOCATION = rc.senseEnemyHQLocation();
 	public static final MapLocation FRIENDLY_HQ_LOCATION = rc.senseHQLocation();
-	
-	
+
 	// Does a bfs to create a path to a destination.
 	// Bfs is started at the destination then progresses outward, broadcasting to a channel that represents 
 	// a x,y coordinate the direction to travel to reach the destination.
@@ -144,6 +144,12 @@ public class PathFind {
 			
 	public static int getBroadcastChannelNum(MapLocation location, int pathNum) throws GameActionException {
 		return pathNum * 10000 + MapData.locToInt(location);
+	}
+	
+	public static void initPathFindData() throws GameActionException {
+		PathFind.setPathNotFound(0);
+		PathFind.setPathNotFound(1);
+		PathFind.setPathNotFound(2);
 	}
 	
 	public static void printDirectionalField() throws GameActionException {
