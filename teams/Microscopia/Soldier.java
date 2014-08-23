@@ -26,17 +26,7 @@ public class Soldier {
 		if (Pastr.enemyPastrCount() > 0) {
 			Movement.moveToEnemyPastrLocation(Movement.RUN);
 		} else {
-			if (Clock.getRoundNum() < 300) {
-				Movement.moveToFriendlyPastrLocation(Movement.RUN);
-			} else {			
-				if (!Pastr.isPastrBuilt() && PathFind.distanceSquaredToPathLocation(PathFind.FRIENDLY_PASTR_PATH_NUM) == 0 && inGoodSituation()) {
-					Pastr.buildPastr();
-				} else if (!NoiseTower.isTowerBuilt() && PathFind.distanceSquaredToPathLocation(PathFind.FRIENDLY_PASTR_PATH_NUM) < 2 && inGoodSituation()) {
-					NoiseTower.buildTower();
-				} else {
-					Movement.moveToFriendlyPastrLocation(Movement.SNEAK);
-				}
-			}
+			Movement.moveToFriendlyPastrLocation(Movement.RUN);
 		}
 	}
 	
@@ -64,16 +54,10 @@ public class Soldier {
 	public static void shoot() throws GameActionException {
 		Robot[] enemies = rc.senseNearbyGameObjects(Robot.class, RobotType.HQ.attackRadiusMaxSquared, rc.getTeam().opponent());		
 		if (enemies.length > 0) {
-			RobotInfo robotToAttack = rc.senseRobotInfo(enemies[(int)(Math.random() * enemies.length)]);
+			RobotInfo robotToAttack = rc.senseRobotInfo(enemies[0]);
 			MapLocation attackLocation = robotToAttack.location;
 			if (rc.isActive() && robotToAttack.type != RobotType.HQ && rc.canAttackSquare(attackLocation)) {
-				if (Pastr.enemyPastrCount() > 0) {
-					if (robotToAttack.type == RobotType.PASTR) {
-						rc.attackSquare(attackLocation);
-					}
-				} else {
-					rc.attackSquare(attackLocation);
-				}
+				rc.attackSquare(attackLocation);
 			} 
 		}
 	}

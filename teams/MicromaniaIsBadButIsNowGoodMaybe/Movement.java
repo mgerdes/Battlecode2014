@@ -1,4 +1,4 @@
-package MicromaniaIsBad;
+package MicromaniaIsBadButIsNowGoodMaybe;
 
 import java.util.*;
 import battlecode.common.*;
@@ -10,13 +10,23 @@ public class Movement {
 	public static int SNEAK = 1;
 	public static int RUN = 0;
 
+	public static boolean inBug = false;
+	public static Direction dirOfWall = null;
+	public static Direction bugMovingDir = null;
+
 	public static void move(Direction movingDirection, int type) throws GameActionException {
-		if (tryToMove(movingDirection, type));
-		else {
-			moveRandomly(type);
+		if (rc.isActive()) {
+			if (tryToMove(movingDirection, type));
+			else if (tryToMove(movingDirection.rotateLeft(), type)); 
+			else if (tryToMove(movingDirection.rotateRight(), type));
+			else if (tryToMove(movingDirection.rotateLeft().rotateLeft(), type));
+			else if (tryToMove(movingDirection.rotateRight().rotateRight(), type));
+			else {
+				moveRandomly(type);
+			}
 		}
 	}
-	
+
 	public static void move(MapLocation movingLocation, int type) throws GameActionException {
 		move(rc.getLocation().directionTo(movingLocation), type);
 	}
@@ -36,7 +46,7 @@ public class Movement {
 	
 	public static void moveRandomly(int type) throws GameActionException {
 		Direction movingDirection = MapData.directions[(int)(Math.random() * 8)];
-		tryToMove(movingDirection, type);
+		move(movingDirection, type);
 	}
 	
 	public static void moveOnPath(int pathNum, int type) throws GameActionException {

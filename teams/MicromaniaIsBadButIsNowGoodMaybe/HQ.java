@@ -1,7 +1,6 @@
-package MicromaniaIsBad;
+package MicromaniaIsBadButIsNowGoodMaybe;
 
 import java.util.*;
-import MicromaniaIsBad.PathFind;
 import battlecode.common.*;
 
 public class HQ {

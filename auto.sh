@@ -7,8 +7,8 @@ mapnum=1;
 aWins=0
 bWins=0
 
-teamA=Microscopia
-teamB=MicromaniaIsBad
+teamA=bot
+teamB=zephyr
 
 teamAC='\e[1;31m' # Team A's color
 teamBC='\e[1;34m' # Team B's color

@@ -1,4 +1,4 @@
-package MicromaniaIsBad;
+package MicromaniaIsBadButIsNowGoodMaybe;
 
 import java.util.*;
 

@@ -4,7 +4,7 @@
 // 3. build a pastr after round 500.
 // 4. defend pastr.
 // 		4a. what to do if enemy build pastr? Maybe make decision basted on milk count.
-package MicromaniaIsBad;
+package MicromaniaIsBadButIsNowGoodMaybe;
 
 import java.util.*;
 import battlecode.common.*;
@@ -16,7 +16,6 @@ public class Soldier {
 	static boolean uploadedLocation;
 	static boolean inGoodSituation;
 
-
 	static Robot enemies[];
 	static Robot friends[];
 
@@ -24,6 +23,7 @@ public class Soldier {
 	static MapLocation friendlyHQLocation;
 	static MapLocation myLocation;
 	static MapLocation enemyToAttackLocation;
+	static MapLocation attackLocation;
 
 	static Team goodTeam;
 	static Team badTeam;
@@ -31,9 +31,9 @@ public class Soldier {
 	static int currentRound;
 
 	// have robot upload its location if it sees an enemy
-	public static void uploadLocation() throws GameActionException {
+	public static void uploadLocation(MapLocation location) throws GameActionException {
 		uploadedLocation = true;			
-		int uploadData = currentRound * 10000 + MapData.locToInt(myLocation);
+		int uploadData = currentRound * 10000 + MapData.locToInt(location);
 		rc.broadcast(Channels.ENEMY_LOCATION_CHANNEL, uploadData);		
 	}
 
@@ -66,6 +66,8 @@ public class Soldier {
 		currentRound = Clock.getRoundNum();
 
 		inGoodSituation = inGoodSituation();
+
+		attackLocation = null;
 	}
 
 	// run when soldier first spawn
@@ -79,9 +81,9 @@ public class Soldier {
 		initRound();
 		doYourThing();
 
-		rc.setIndicatorString(0, "" + uploadedLocation);
+		//rc.setIndicatorString(0, "" + uploadedLocation);
 		if (uploadedLocation) {
-			rc.setIndicatorString(0, "" + MapData.locToInt(enemyToAttackLocation));	
+		//	rc.setIndicatorString(0, "" + MapData.locToInt(enemyToAttackLocation));	
 		}
 
 		// Avoid the enemy hq.
@@ -93,30 +95,19 @@ public class Soldier {
 		if (Pastr.enemyPastrCount() > 0) {
 			Movement.moveOnPath(PathFind.ENEMY_PASTR_PATH_NUM_1, Movement.RUN);
 		} else {
-			Movement.moveOnPath(PathFind.FRIENDLY_PASTR_PATH_NUM_1, Movement.RUN);
-//			if (Clock.getRoundNum() < 300) {
-//				Movement.moveOnPath(PathFind.FRIENDLY_PASTR_PATH_NUM_1, Movement.RUN);
-//			} else {	
-//				int distanceSquaredToPastr = PathFind.distanceSquaredToPathLocation(PathFind.FRIENDLY_PASTR_PATH_NUM_1);
-//				
-//				if (distanceSquaredToPastr > 9) {
-//					Movement.moveOnPath(PathFind.FRIENDLY_PASTR_PATH_NUM_1, Movement.SNEAK);
-//				} else {
-//					if (!Pastr.isPastrBuilt() && distanceSquaredToPastr == 0 && inGoodSituation) {
-//						Pastr.buildPastr();
-//					} else if (!NoiseTower.isTowerBuilt() && distanceSquaredToPastr == 1 && inGoodSituation) {
-//						NoiseTower.buildTower();
-//					} else if (!Pastr.isPastrBuilt() || !NoiseTower.isTowerBuilt()) {
-//						Movement.moveOnPath(PathFind.FRIENDLY_PASTR_PATH_NUM_1, Movement.SNEAK);
-//						if (uploadedLocation) {
-//							Movement.move(enemyToAttackLocation, Movement.SNEAK);
-//						}
-//					} 
-//					if (uploadedLocation) {
-//						Movement.move(enemyToAttackLocation, Movement.SNEAK);
-//					}
-//				}
-//			}
+			if (Clock.getRoundNum() < 300) {
+				Movement.moveOnPath(PathFind.FRIENDLY_PASTR_PATH_NUM_1, Movement.RUN);
+			} else {	
+				int distanceSquaredToPastr = PathFind.distanceSquaredToPathLocation(PathFind.FRIENDLY_PASTR_PATH_NUM_1);
+				
+				if (!Pastr.isPastrBuilt() && distanceSquaredToPastr == 0 && inGoodSituation) {
+					Pastr.buildPastr();
+				} else if (!NoiseTower.isTowerBuilt() && distanceSquaredToPastr == 1 && inGoodSituation) {
+					NoiseTower.buildTower();
+				} else {
+					Movement.moveOnPath(PathFind.FRIENDLY_PASTR_PATH_NUM_1, Movement.SNEAK);
+				}
+			}
 		}
 
 	}
@@ -127,25 +118,40 @@ public class Soldier {
 	}
 	
 	public static void doYourThing() throws GameActionException {
-		shoot();
+		whatDoIDo();
 	}
 	
-	public static void shoot() throws GameActionException {
-		MapLocation attackLocation = null;
-		
+	public static void whatDoIDo() throws GameActionException {
+		tryToUploadLocation();
+		if (uploadedLocation) {
+			if (rc.getHealth() > 35) {
+				shoot();
+				Movement.move(enemyToAttackLocation, Movement.SNEAK);
+			} else {
+				if (myLocation.distanceSquaredTo(enemyToAttackLocation) < RobotType.SOLDIER.attackRadiusMaxSquared) {
+					Movement.move(myLocation.directionTo(enemyToAttackLocation).opposite(), Movement.RUN);
+				} 
+			}
+		}
+	}
+
+
+	public static void tryToUploadLocation() throws GameActionException {
 		for (Robot enemy : enemies) {
 			RobotInfo enemyInfo = rc.senseRobotInfo(enemy);
-			if (enemyInfo.type != RobotType.HQ){
+			if (enemyInfo.type != RobotType.HQ) {
 				MapLocation enemyLocation = enemyInfo.location;
-				
-				if(!uploadedLocation) uploadLocation();
 
-				if (rc.canAttackSquare(enemyLocation)) {
+				if (!uploadedLocation) uploadLocation(enemyLocation);
+
+				if(rc.canAttackSquare(enemyLocation)) {
 					attackLocation = enemyLocation;
 				}
 			}
 		}
-		
+	}
+	
+	public static void shoot() throws GameActionException {
 		if (attackLocation != null && rc.isActive() && rc.canAttackSquare(attackLocation)) {
 			rc.attackSquare(attackLocation);
 		}
