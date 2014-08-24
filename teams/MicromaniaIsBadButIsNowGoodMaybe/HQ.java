@@ -33,8 +33,8 @@ public class HQ {
 	}
 		
 	public static void doYourThing() throws GameActionException {
-		spawn();
 		shoot();
+		spawn();
 
 		// execute stuff every 20 rounds.
 		int currentRoundNum = Clock.getRoundNum();
@@ -64,13 +64,13 @@ public class HQ {
 	}
 	
 	public static void shoot() throws GameActionException {
-		Robot[] enemies = rc.senseNearbyGameObjects(Robot.class, RobotType.SOLDIER.attackRadiusMaxSquared, rc.getTeam().opponent());
-		if (enemies.length > 0) {
-			if (rc.isActive()) {
-				RobotInfo robotToAttack = rc.senseRobotInfo(enemies[(int)(Math.random() * enemies.length)]);
+		if (rc.isActive()) {
+			Robot[] enemies = rc.senseNearbyGameObjects(Robot.class, RobotType.HQ.attackRadiusMaxSquared, rc.getTeam().opponent());
+			if (enemies.length > 0) {
+				RobotInfo robotToAttack = rc.senseRobotInfo(enemies[0]);
 				if (robotToAttack.type != RobotType.HQ) {
 					MapLocation attackLocation = robotToAttack.location;
-					if (rc.canAttackSquare(attackLocation)) {
+					if (rc.isActive() && rc.canAttackSquare(attackLocation)) {
 						rc.attackSquare(attackLocation);
 					} 
 				}

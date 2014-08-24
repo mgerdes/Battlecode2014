@@ -73,7 +73,8 @@ public class PathFind {
 						if (!visited[nextX][nextY] && MapData.map[nextX][nextY] != 2) {
 							q.enqueue(nextX);
 							q.enqueue(nextY);
-							q.enqueue((MapData.map[nextX][nextY] + 1) % 2);
+							//q.enqueue((MapData.map[nextX][nextY] + 1) % 2);
+							q.enqueue(0);
 								
 							visited[nextX][nextY] = true;
 							
@@ -94,9 +95,13 @@ public class PathFind {
 		}
 
 	}
+
+	public static MapLocation pathLocation(int pathNum) throws GameActionException {
+		return MapData.intToLoc(rc.readBroadcast(Channels.PATH_LOCATION_CHANNEL[pathNum]));
+	}
 	
 	public static int distanceSquaredToPathLocation(int pathNum) throws GameActionException {
-		return rc.getLocation().distanceSquaredTo(MapData.intToLoc(rc.readBroadcast(Channels.PATH_LOCATION_CHANNEL[pathNum])));
+		return rc.getLocation().distanceSquaredTo(pathLocation(pathNum));
 	}
 	
 	// broadcasts a 1 to the appropriate channel, indicating the path is found.

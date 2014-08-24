@@ -94,8 +94,11 @@ public class Soldier {
 
 		// tactics are messy :(.
 		if (Pastr.enemyPastrCount() > 0) {
-			if (!defenseMode)
+			if (!defenseMode) {
 				Movement.moveOnPath(PathFind.ENEMY_PASTR_PATH_NUM_1, Movement.RUN);
+			} else if (rc.senseTeamMilkQuantity(badTeam) > rc.senseTeamMilkQuantity(goodTeam)) {
+				Movement.moveOnPath(PathFind.ENEMY_PASTR_PATH_NUM_1, Movement.RUN);
+			}
 		} else {
 			if (Clock.getRoundNum() < 300) {
 				Movement.moveOnPath(PathFind.FRIENDLY_PASTR_PATH_NUM_1, Movement.RUN);
@@ -135,12 +138,15 @@ public class Soldier {
 			}
 			if (rc.getHealth() > 30) {
 				shoot();
-				if (defenseMode && PathFind.distanceSquaredToPathLocation(PathFind.FRIENDLY_PASTR_PATH_NUM_1) < 100) { 
-					Movement.move(enemyToAttackLocation, Movement.RUN);
+				if (defenseMode) { 
+					if (enemyToAttackLocation.distanceSquaredTo(PathFind.pathLocation(PathFind.FRIENDLY_PASTR_PATH_NUM_1)) < 50) {
+						Movement.move(enemyToAttackLocation, Movement.RUN);
+					} else {
+
+					}
 				} else if (!defenseMode) {
 					Movement.move(enemyToAttackLocation, Movement.RUN);
 				}
-
 			} else {
 				Movement.move(myLocation.directionTo(enemyToAttackLocation).opposite(), Movement.RUN);
 			}
