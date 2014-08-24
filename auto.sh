@@ -8,7 +8,7 @@ aWins=0
 bWins=0
 
 teamA=bot
-teamB=zephyr
+teamB=MicromaniaIsBadButIsNowGoodMaybe
 
 teamAC='\e[1;31m' # Team A's color
 teamBC='\e[1;34m' # Team B's color
@@ -29,6 +29,7 @@ do
 	printf "Map: %s (%d / %d)\n" $mapName $mapnum $nummaps
 
 	read winner x reason <<< $(ant file | awk '/wins/ {printf "%s\n %s\n", $3, $7} /winning/ {print substr($0, index($0,$7))}')
+	
 	
 	round=${x%?}
 

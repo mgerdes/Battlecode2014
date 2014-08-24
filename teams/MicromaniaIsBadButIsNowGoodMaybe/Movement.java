@@ -17,7 +17,7 @@ public class Movement {
 	public static void move(Direction movingDirection, int type) throws GameActionException {
 		if (rc.isActive()) {
 			if (tryToMove(movingDirection, type));
-			else if (tryToMove(movingDirection.rotateLeft(), type)); 
+			else if (tryToMove(movingDirection.rotateLeft(), type));
 			else if (tryToMove(movingDirection.rotateRight(), type));
 			else if (tryToMove(movingDirection.rotateLeft().rotateLeft(), type));
 			else if (tryToMove(movingDirection.rotateRight().rotateRight(), type));
@@ -30,7 +30,7 @@ public class Movement {
 	public static void move(MapLocation movingLocation, int type) throws GameActionException {
 		move(rc.getLocation().directionTo(movingLocation), type);
 	}
-	
+
 	public static boolean tryToMove(Direction movingDirection, int type) throws GameActionException {
 		if (rc.isActive() && rc.canMove(movingDirection)) {
 			if (type == 1) {

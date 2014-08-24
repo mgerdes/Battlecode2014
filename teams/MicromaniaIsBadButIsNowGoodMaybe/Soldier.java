@@ -15,6 +15,8 @@ public class Soldier {
 
 	static boolean uploadedLocation;
 	static boolean inGoodSituation;
+	static boolean inSuicideMode;
+	static boolean defenseMode;
 
 	static Robot enemies[];
 	static Robot friends[];
@@ -49,7 +51,7 @@ public class Soldier {
 		int data = rc.readBroadcast(Channels.ENEMY_LOCATION_CHANNEL);
 		int uploadRound = data / 10000;
 
-		if (currentRound - 10 > uploadRound)
+		if (currentRound - 5 > uploadRound)
 			return false;
 		else 
 			return true;
@@ -75,29 +77,30 @@ public class Soldier {
 		goodTeam = rc.getTeam();
 		badTeam = goodTeam.opponent();
 		enemyHQLocation = rc.senseEnemyHQLocation();
+
+		inSuicideMode = false;
+		defenseMode = false;
 	}
 
 	public static void run() throws GameActionException {	
 		initRound();
-		doYourThing();
-
-		//rc.setIndicatorString(0, "" + uploadedLocation);
-		if (uploadedLocation) {
-		//	rc.setIndicatorString(0, "" + MapData.locToInt(enemyToAttackLocation));	
-		}
-
-		// Avoid the enemy hq.
-		if (myLocation.distanceSquaredTo(enemyHQLocation) < RobotType.HQ.attackRadiusMaxSquared) {
+		
+		// avoid the enemy hq
+		if (myLocation.distanceSquaredTo(enemyHQLocation) < RobotType.HQ.attackRadiusMaxSquared + 10) {
 			Movement.move(myLocation.directionTo(enemyHQLocation).opposite(), Movement.RUN);
 		}
 
+		doYourThing();
+
 		// tactics are messy :(.
 		if (Pastr.enemyPastrCount() > 0) {
-			Movement.moveOnPath(PathFind.ENEMY_PASTR_PATH_NUM_1, Movement.RUN);
+			if (!defenseMode)
+				Movement.moveOnPath(PathFind.ENEMY_PASTR_PATH_NUM_1, Movement.RUN);
 		} else {
 			if (Clock.getRoundNum() < 300) {
 				Movement.moveOnPath(PathFind.FRIENDLY_PASTR_PATH_NUM_1, Movement.RUN);
 			} else {	
+				defenseMode = true;
 				int distanceSquaredToPastr = PathFind.distanceSquaredToPathLocation(PathFind.FRIENDLY_PASTR_PATH_NUM_1);
 				
 				if (!Pastr.isPastrBuilt() && distanceSquaredToPastr == 0 && inGoodSituation) {
@@ -124,14 +127,31 @@ public class Soldier {
 	public static void whatDoIDo() throws GameActionException {
 		tryToUploadLocation();
 		if (uploadedLocation) {
-			if (rc.getHealth() > 35) {
-				shoot();
-				Movement.move(enemyToAttackLocation, Movement.SNEAK);
-			} else {
-				if (myLocation.distanceSquaredTo(enemyToAttackLocation) < RobotType.SOLDIER.attackRadiusMaxSquared) {
-					Movement.move(myLocation.directionTo(enemyToAttackLocation).opposite(), Movement.RUN);
-				} 
+			if (rc.getHealth() > 95 && rc.getRobot().getID() % 50 == 0) {
+				inSuicideMode = true;
+			} 
+			if (inSuicideMode) {
+				cyanideSuicide(enemyToAttackLocation);
 			}
+			if (rc.getHealth() > 30) {
+				shoot();
+				if (defenseMode && PathFind.distanceSquaredToPathLocation(PathFind.FRIENDLY_PASTR_PATH_NUM_1) < 100) { 
+					Movement.move(enemyToAttackLocation, Movement.RUN);
+				} else if (!defenseMode) {
+					Movement.move(enemyToAttackLocation, Movement.RUN);
+				}
+
+			} else {
+				Movement.move(myLocation.directionTo(enemyToAttackLocation).opposite(), Movement.RUN);
+			}
+		}
+	}
+
+	public static void cyanideSuicide(MapLocation location) throws GameActionException {
+		if (myLocation.distanceSquaredTo(location) > 2) {
+			Movement.move(location, Movement.RUN);
+		} else {
+			rc.selfDestruct();	 
 		}
 	}
 
@@ -150,10 +170,22 @@ public class Soldier {
 			}
 		}
 	}
+
+	public static boolean enemyAt(MapLocation location) throws GameActionException {
+		for (Robot enemy : enemies) {
+			RobotInfo enemyInfo = rc.senseRobotInfo(enemy);
+			if (enemyInfo.location.x == location.x && enemyInfo.location.y == location.y) return true;
+		}
+		return false;
+	}
 	
 	public static void shoot() throws GameActionException {
-		if (attackLocation != null && rc.isActive() && rc.canAttackSquare(attackLocation)) {
+		if (enemyToAttackLocation != null && rc.isActive() && rc.canAttackSquare(enemyToAttackLocation) && enemyAt(enemyToAttackLocation)) {
+			rc.setIndicatorString(0, "attacking dude at " + enemyToAttackLocation.x + ", " + enemyToAttackLocation.y);
+			rc.attackSquare(enemyToAttackLocation);
+		} else if (attackLocation != null && rc.isActive() && rc.canAttackSquare(attackLocation)) {
 			rc.attackSquare(attackLocation);
+			rc.setIndicatorString(0, "attacking dude at " + attackLocation.x + ", " + attackLocation.y);
 		}
 	}
 	
