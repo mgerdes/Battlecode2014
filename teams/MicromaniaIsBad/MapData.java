@@ -5,7 +5,7 @@ import battlecode.common.*;
 
 public class MapData {
 	
-	public static RobotController rc = RobotPlayer.rc;
+	private static RobotController rc = RobotPlayer.rc;
 
 	public static Direction directions[] = Direction.values();
 
